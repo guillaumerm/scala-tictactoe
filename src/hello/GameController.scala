@@ -38,15 +38,25 @@ import javafx.scene.control.Button
  */
 class GameController extends jfxf.Initializable {
 
+  val cGagnante: List[List[Int]] = List(
+    List(0, 1, 2),
+    List(3, 4, 5),
+    List(6, 7, 8),
+    List(0, 3, 6),
+    List(1, 4, 7),
+    List(2, 5, 8),
+    List(0, 4, 8),
+    List(2, 4, 6))
+
   var partie: List[Char] = List('-', '-', '-', '-', '-', '-', '-', '-', '-')
 
   var compteurTour: Int = 0
-  
+
   val joueurX: Char = 'X'
 
   val joueurO: Char = 'O'
 
-  private var listButton: List[jfxsc.Button] = _
+  var listButton: List[jfxsc.Button] = List()
 
   @jfxf.FXML
   private var gridDelegate: jfxsl.GridPane = _
@@ -56,15 +66,19 @@ class GameController extends jfxf.Initializable {
   private def actionCase(event: jfxe.ActionEvent) {
     println(compteurTour)
     val btn: jfxsc.Button = event.getSource.asInstanceOf[jfxsc.Button]
-    val joueurActif = if(compteurTour%2==0)joueurX else joueurO
-    
-    if(setValeur(joueurActif, (btn.getId() takeRight 1).toInt)){
+    listButton = listButton :+ btn
+    val joueurActif = if (compteurTour % 2 == 0) joueurX else joueurO
+
+    if (setValeur(joueurActif, (btn.getId() takeRight 1).toInt)) {
       btn.setText(joueurActif.toString())
     }
     if (compteurTour > 4 && compteurTour < 10) {
-      estGagnant(joueurActif)
+      if(estGagnant(joueurActif))
+      {
+        println("tu as gagner")
+        initList()
+      }
     }
-    //println(event.getSource.asInstanceOf[jfxsc.Button].getId() takeRight 1)
   }
 
   @jfxf.FXML
@@ -78,7 +92,7 @@ class GameController extends jfxf.Initializable {
 
   def setValeur(joueur: Char, index: Int): Boolean = {
     var retour = false
-    if(partie(index) == '-') {
+    if (partie(index) == '-') {
       partie = partie.updated(index, joueur)
       compteurTour = compteurTour + 1
       retour = true
@@ -88,10 +102,31 @@ class GameController extends jfxf.Initializable {
   }
 
   def initList() {
+    
     partie = List('-', '-', '-', '-', '-', '-', '-', '-', '-')
+    
+    compteurTour = 0
+    for (a <- 0 to (listButton.size - 1)) {
+      listButton(a).setText(" ")
+    }
+    listButton = List()
   }
 
-  def estGagnant(joueur: Char) {
+  def estGagnant(joueur: Char): Boolean = {
+    var retour = false
 
+    for (a <- 0 to 7) {
+      var nmb = 0
+      for (b <- 0 to 2) {
+        if (partie(cGagnante(a)(b)) == joueur)
+        {
+          nmb = nmb + 1
+          if(nmb == 3){
+            retour = true
+          }
+        }
+      }
+    }
+    return retour
   }
 }
