@@ -76,17 +76,20 @@ class GameController extends jfxf.Initializable {
     if (ai) {
       joueurActif = joueurX
     }
-
-    if (setValeur(joueurActif, (btn.getId() takeRight 1).toInt)) {
+    var partieTemp = utilTicTacToe.jouerTour(partie, joueurActif, (btn.getId() takeRight 1).toInt, compteurTour)
+    
+    if (!utilTicTacToe.partieEquals(partie, partieTemp)) {
+      partie = partieTemp
+      compteurTour = compteurTour + 1
       btn.setText(joueurActif.toString())
     }
 
     if (compteurTour > 4 && compteurTour < 10) {
-      if (estGagnant(joueurActif)) {
+      if (utilTicTacToe.estGagnant(partie, joueurActif)) {
         println("tu as gagner")
         initList()
       } else {
-        if (gameOver()) {
+        if (utilTicTacToe.gameOver(partie)) {
           println("partie null et fini")
           initList()
         }
@@ -110,7 +113,7 @@ class GameController extends jfxf.Initializable {
       for (b <- 0 to 2) {
         if (partie(cGagnante(a)(b)) == '-' && !aJoue) {
           partie = partie.updated(cGagnante(a)(b), joueurActif)
-          if (estGagnant(joueurActif)) {
+          if (utilTicTacToe.estGagnant(partie, joueurActif)) {
             aJoue = true
             partie = partie.updated(cGagnante(a)(b), '-')
             setValeur(joueurActif, cGagnante(a)(b))
@@ -128,7 +131,7 @@ class GameController extends jfxf.Initializable {
         for (b <- 0 to 2) {
           if (partie(cGagnante(a)(b)) == '-' && !aJoue) {
             partie = partie.updated(cGagnante(a)(b), joueurX)
-            if (estGagnant(joueurX)) {
+            if (utilTicTacToe.estGagnant(partie, joueurX)) {
               aJoue = true
               partie = partie.updated(cGagnante(a)(b), '-')
               setValeur(joueurActif, cGagnante(a)(b))
@@ -156,11 +159,11 @@ class GameController extends jfxf.Initializable {
     }
 
     if (compteurTour > 4 && compteurTour < 10) {
-      if (estGagnant(joueurActif)) {
+      if (utilTicTacToe.estGagnant(partie, joueurActif)) {
         println("IA as gagner")
         initList()
       } else {
-        if (gameOver()) {
+        if (utilTicTacToe.gameOver(partie)) {
           println("partie null et fini")
           initList()
         }
@@ -207,31 +210,31 @@ class GameController extends jfxf.Initializable {
     listButton = List()
   }
 
-  def gameOver(): Boolean =
-    {
-      var retour = false
+//  def gameOver(): Boolean =
+//    {
+//      var retour = false
+//
+//      if (compteurTour == 9) {
+//        retour = true
+//      }
+//
+//      return retour
+//    }
 
-      if (compteurTour == 9) {
-        retour = true
-      }
-
-      return retour
-    }
-
-  def estGagnant(joueur: Char): Boolean = {
-    var retour = false
-
-    for (a <- 0 to 7) {
-      var nmb = 0
-      for (b <- 0 to 2) {
-        if (partie(cGagnante(a)(b)) == joueur) {
-          nmb = nmb + 1
-          if (nmb == 3) {
-            retour = true
-          }
-        }
-      }
-    }
-    return retour
-  }
+//  def estGagnant(joueur: Char): Boolean = {
+//    var retour = false
+//
+//    for (a <- 0 to 7) {
+//      var nmb = 0
+//      for (b <- 0 to 2) {
+//        if (partie(cGagnante(a)(b)) == joueur) {
+//          nmb = nmb + 1
+//          if (nmb == 3) {
+//            retour = true
+//          }
+//        }
+//      }
+//    }
+//    return retour
+//  }
 }
