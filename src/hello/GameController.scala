@@ -38,6 +38,8 @@ import javafx.scene.control.Button
  */
 class GameController extends jfxf.Initializable {
 
+  var ai = false
+
   val cGagnante: List[List[Int]] = List(
     List(0, 1, 2),
     List(3, 4, 5),
@@ -61,29 +63,119 @@ class GameController extends jfxf.Initializable {
   @jfxf.FXML
   private var gridDelegate: jfxsl.GridPane = _
   private var grilleJeu: GridPane = _
+  private var test: jfxsl.Pane = _
+  @jfxf.FXML
+  var etat: jfxsc.Label = _
 
   @jfxf.FXML
   private def actionCase(event: jfxe.ActionEvent) {
     println(compteurTour)
     val btn: jfxsc.Button = event.getSource.asInstanceOf[jfxsc.Button]
     listButton = listButton :+ btn
-    val joueurActif = if (compteurTour % 2 == 0) joueurX else joueurO
+    var joueurActif = if (compteurTour % 2 == 0) joueurX else joueurO
+    if (ai) {
+      joueurActif = joueurX
+    }
 
     if (setValeur(joueurActif, (btn.getId() takeRight 1).toInt)) {
       btn.setText(joueurActif.toString())
     }
+
     if (compteurTour > 4 && compteurTour < 10) {
-      if(estGagnant(joueurActif))
-      {
+      if (estGagnant(joueurActif)) {
         println("tu as gagner")
         initList()
+      } else {
+        if (gameOver()) {
+          println("partie null et fini")
+          initList()
+        }
+      }
+    }
+
+    if (ai) {
+      println("tour ai")
+      tourAi();
+    }
+
+    var prochain = if (joueurActif == joueurO) joueurX else joueurO
+    etat.setText("C'est le tour des " + prochain)
+  }
+
+  def tourAi() {
+    var aJoue = false
+    var joueurActif = joueurO
+
+    for (a <- 0 to 7) {
+      for (b <- 0 to 2) {
+        if (partie(cGagnante(a)(b)) == '-' && !aJoue) {
+          partie = partie.updated(cGagnante(a)(b), joueurActif)
+          if (estGagnant(joueurActif)) {
+            aJoue = true
+            partie = partie.updated(cGagnante(a)(b), '-')
+            setValeur(joueurActif, cGagnante(a)(b))
+          } else {
+            partie = partie.updated(cGagnante(a)(b), '-')
+          }
+        }
+      }
+    }
+
+    var positionPossible: List[Int] = List()
+
+    if (!aJoue) { // Si l'adversaire vas gagner ce tour que IA n'as pas joué
+      for (a <- 0 to 7) {
+        for (b <- 0 to 2) {
+          if (partie(cGagnante(a)(b)) == '-' && !aJoue) {
+            partie = partie.updated(cGagnante(a)(b), joueurX)
+            if (estGagnant(joueurX)) {
+              aJoue = true
+              partie = partie.updated(cGagnante(a)(b), '-')
+              setValeur(joueurActif, cGagnante(a)(b))
+              grilleJeu.children(cGagnante(a)(b)).asInstanceOf[jfxsc.Button].setText(joueurActif.toString())
+            } else {
+              partie = partie.updated(cGagnante(a)(b), '-')
+            }
+          }
+        }
+      }
+    }
+
+    if (!aJoue) { // Si aucun joeur ne vas ganger ce tour et que IA n'as pas joué
+      for (a <- 0 to 8) {
+        if (partie(a) == '-') {
+          positionPossible = positionPossible :+ a
+        }
+      }
+      println("position possible = " + positionPossible)
+
+      val positionJoue = scala.util.Random.nextInt(positionPossible.size)
+      println("position possible = " + positionJoue)
+      setValeur(joueurActif, positionJoue)
+      grilleJeu.children(positionJoue).asInstanceOf[jfxsc.Button].setText(joueurActif.toString())
+    }
+
+    if (compteurTour > 4 && compteurTour < 10) {
+      if (estGagnant(joueurActif)) {
+        println("IA as gagner")
+        initList()
+      } else {
+        if (gameOver()) {
+          println("partie null et fini")
+          initList()
+        }
       }
     }
   }
 
   @jfxf.FXML
-  private def handleClear(event: jfxe.ActionEvent) {
+  private def restart(event: jfxe.ActionEvent) {
+    initList()
+  }
 
+  @jfxf.FXML
+  private def activerIA(event: jfxe.ActionEvent) {
+    ai = !ai
   }
 
   def initialize(url: URL, rb: util.ResourceBundle) {
@@ -101,16 +193,30 @@ class GameController extends jfxf.Initializable {
     return retour
   }
 
+  /**
+   * Fonction qui permet de renitialiser la partie.
+   */
   def initList() {
-    
+    etat.setText("La partie n'est pas commencé")
     partie = List('-', '-', '-', '-', '-', '-', '-', '-', '-')
-    
+
     compteurTour = 0
-    for (a <- 0 to (listButton.size - 1)) {
-      listButton(a).setText(" ")
+    for (a <- 0 to grilleJeu.children.size() - 1) {
+      grilleJeu.children(a).asInstanceOf[jfxsc.Button].setText(" ")
     }
     listButton = List()
   }
+
+  def gameOver(): Boolean =
+    {
+      var retour = false
+
+      if (compteurTour == 9) {
+        retour = true
+      }
+
+      return retour
+    }
 
   def estGagnant(joueur: Char): Boolean = {
     var retour = false
@@ -118,10 +224,9 @@ class GameController extends jfxf.Initializable {
     for (a <- 0 to 7) {
       var nmb = 0
       for (b <- 0 to 2) {
-        if (partie(cGagnante(a)(b)) == joueur)
-        {
+        if (partie(cGagnante(a)(b)) == joueur) {
           nmb = nmb + 1
-          if(nmb == 3){
+          if (nmb == 3) {
             retour = true
           }
         }
