@@ -21,8 +21,4 @@ object ScalaFXTicTacToe extends JFXApp {
     title = "FXML GridPane Demo"
     scene = new Scene(root)
   }
-  
-
-  
-
 }

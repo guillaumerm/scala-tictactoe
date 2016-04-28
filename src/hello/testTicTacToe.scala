@@ -1,5 +1,7 @@
 package hello
 
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 
 class testTicTacToe extends FunSuite {
@@ -17,20 +19,30 @@ class testTicTacToe extends FunSuite {
     var grilleTest = List('X', 'X', 'X', '-', '-', '-', '-', '-', '-')
     assert(utilTicTacToe.estGagnant(grilleTest, 'X') == true)
   }
-  
-  test("util.gameOver dois retourner true quand la grille est plaine"){
+
+  test("util.gameOver dois retourner true quand la grille est plaine") {
     var grilleTest = List('X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X')
     assert(utilTicTacToe.gameOver(grilleTest) == true)
   }
-  
-  test("util.peutJouer dois retourner false quand la case n'est pas vide"){
+
+  test("util.peutJouer dois retourner false quand la case n'est pas vide") {
     var grilleTest = List('X', '-', '-', '-', '-', '-', '-', '-', '-')
     assert(utilTicTacToe.peutJouer(grilleTest, 0) == false)
   }
-  
-  test("util.partieEqulals dois retouner vrai quand les deux listes sont égale"){
+
+  test("util.partieEqulals dois retouner vrai quand les deux listes sont égale") {
     var grilleTest1 = List('X', '-', '-', '-', '-', '-', '-', '-', '-')
     var grilleTest2 = List('X', '-', '-', '-', '-', '-', '-', '-', '-')
     assert(utilTicTacToe.partieEquals(grilleTest1, grilleTest2) == true)
+  }
+
+  test("util.setValeurAI dois bloquer un joueur quand il a un tor de gagner") {
+    var grilleTest = List('X', 'X', '-', '-', '-', '-', '-', '-', '-')
+    assert(utilTicTacToe.obtenirPositionAI(grilleTest, 'O', 'X') == 2)
+  }
+
+  test("util.setValeurAI dois gagner si il lui manque une case a remplire") {
+    var grilleTest = List('-', '-', '-', 'O', 'O', '-', '-', '-', '-')
+    assert(utilTicTacToe.obtenirPositionAI(grilleTest, 'O', 'X') == 5)
   }
 }
