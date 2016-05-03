@@ -13,31 +13,11 @@ import scalafx.scene.control.Alert
 import scalafx.scene.control.Alert.AlertType
 
 /**
- * Example of a controlled initialized through FXML.
- *
- * When working with FXML, due to the nature of JavaFX FXMLLoader, we need to expose variables and methods that
- * FXMLLoader will be using with JavaFX signatures.
- *
- * The FXMLLoader injects JavaFX objects as values of member variables marked with annotation `@jfxf.FXML`.
- * We need to declare those variables using JavaFX types (not ScalaFX types).
- * We can use those variables directly or wrap them in ScalaFX objects.
- * Here, for the sake of illustration, we only wrap one variable `gridDelegate` (it is not strictly necessary).
- * The most convenient place to do wrapping is in the overloaded method `initialize`. It is executed after
- * FXMLLoader injects its objects.
- *
- * We can rely on ScalaFX "magic" to use ScalaFX methods on variables that were not explicitly wrapped.
- * All we need to do is to "summon the magic" using "import scalafx.Includes._".
- * This is demonstrated in method "handleClear" where we access properties on
- * JavaFX objects using ScalaFX way, no `get` or `set` involved.
- *
- * Methods annotated with `@jfxf.FXML`, that will be wired to event handlers by FLXMLoader.
- * They need to use JavaFX method signatures. This is illustrated in methods: `handleSubmit` and  `handleClear`.
- *
- * In the rest of the code we can use ScalaFX, for instance, to create more in the event handlers or bind
- * properties.
- *
- * @author Jarek Sacha
- */
+* Cette classe est le controleur d'un jeu de Tic-Tac-Toe. Il gère les événement généré par l'interface.
+* Il s'occupe de les gestions des tours et d'assigner les valeurs dans les cases respective. 
+* Lorsque celui-ci est activé, il invoque l'intéligence artificielle.
+* @author Guillaume Rochefort-Mathieu & Antoine Laplante
+*/
 class GameController extends jfxf.Initializable {
 
   var ai = false
@@ -70,7 +50,12 @@ class GameController extends jfxf.Initializable {
   private var test: jfxsl.Pane = _
   @jfxf.FXML
   var etat: jfxsc.Label = _
-
+  
+  
+  /**
+   * Fonction qui permet la gestion d'un tour d'un humain.
+   * @param event Le clic du boutons
+   */
   @jfxf.FXML
   private def actionCase(event: jfxe.ActionEvent) {
     println("")
@@ -83,6 +68,7 @@ class GameController extends jfxf.Initializable {
 
   /**
    * Fonction qui permet la gestion d'un tour d'un humain.
+   * @param index La position du boutons cliqué
    */
   private def gestionTour(index: Int) {
     joueurActif = if (compteurTour % 2 == 0) joueurX else joueurO
@@ -117,6 +103,8 @@ class GameController extends jfxf.Initializable {
 
   /**
    * Fonction qui permet de mettre à jour la partie
+   * @param nouvelleGrille La nouvelle grille de jeu
+   * @param joueur Le joueur actif
    */
   private def updateGame(nouvelleGrille: List[Char], joueur: Char) {
     if (!utilTicTacToe.partieEquals(partie, nouvelleGrille)) {
