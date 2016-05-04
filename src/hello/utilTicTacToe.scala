@@ -1,8 +1,8 @@
 package hello
 /**
-* Cette classe contient les fonctions de bases pour un jeu de Tic-Tac-Toe
-* @author Guillaume Rochefort-Mathieu & Antoine Laplante
-*/
+ * Cette classe contient les fonctions de bases pour un jeu de Tic-Tac-Toe
+ * @author Guillaume Rochefort-Mathieu & Antoine Laplante
+ */
 object utilTicTacToe {
 
   val nombreDeCase = 81
@@ -20,7 +20,7 @@ object utilTicTacToe {
   val positionPrioritaire: List[Int] = List(0, 2, 4, 6, 8)
   val positionNonPrioritaire: List[Int] = List(1, 3, 5, 7)
 
-   /**
+  /**
    * Fonction qui vérifie si l'AI peut jouer une case qui va empêcher l'autre joueur de gagner
    * @param grille La grille de jeu
    * @param joueur Le joueur actif
@@ -30,26 +30,26 @@ object utilTicTacToe {
     var position = -1
     var aJoue = false
     for (x <- 0 to (cGagnante.size - 1)) {
-        var grilleTemp = grille(x)  
-        for (a <- 0 to (cGagnante.size - 1)) {
-          for (b <- 0 to (cGagnante(a).size - 1)) {
-            if (grilleTemp(cGagnante(a)(b)) == '-' && !aJoue) {
-              grilleTemp = grilleTemp.updated(cGagnante(a)(b), adversaire)
-              if (utilTicTacToe.estGagnant(grille, adversaire)) {
-                aJoue = true
-                grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
-                position = cGagnante(a)(b)
-              } else {
-                grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
-              }
+      var grilleTemp = grille(x)
+      for (a <- 0 to (cGagnante.size - 1)) {
+        for (b <- 0 to (cGagnante(a).size - 1)) {
+          if (grilleTemp(cGagnante(a)(b)) == '-' && !aJoue) {
+            grilleTemp = grilleTemp.updated(cGagnante(a)(b), adversaire)
+            if (utilTicTacToe.estGagnant(grille, adversaire)) {
+              aJoue = true
+              grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
+              position = cGagnante(a)(b)
+            } else {
+              grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
             }
           }
         }
+      }
     }
     return position
   }
 
-   /**
+  /**
    * Fonction qui vérifie si l'AI peut jouer une case qui va le faire gagner
    * @param grille La grille de jeu
    * @param joueur Le joueur actif
@@ -59,23 +59,22 @@ object utilTicTacToe {
     var position = -1
     var aJoue = false
     //Si il peut jouer pour gagner
-    for (x <- 0 to grille.size-1) {
-      
-    var grilleTemp = grille(x)
-        for (a <- 0 to (cGagnante.size - 1)) {
-          for (b <- 0 to (cGagnante(a).size - 1)) {           
-            if (grilleTemp(cGagnante(a)(b)) == '-' && !aJoue) {
-              grilleTemp = grilleTemp.updated(cGagnante(a)(b), joueur)
-              if (utilTicTacToe.estGagnant(grille, joueur)) {
-                aJoue = true
-                grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
-                position = cGagnante(a)(b)
-              } else {
-                grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
-              }
+    for (x <- 0 to grille.size - 1) {
+      var grilleTemp = grille(x)
+      for (a <- 0 to (cGagnante.size - 1)) {
+        for (b <- 0 to (cGagnante(a).size - 1)) {
+          if (grilleTemp(cGagnante(a)(b)) == '-' && !aJoue) {
+            grilleTemp = grilleTemp.updated(cGagnante(a)(b), joueur)
+            if (utilTicTacToe.estGagnant(grille, joueur)) {
+              aJoue = true
+              grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
+              position = cGagnante(a)(b)
+            } else {
+              grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
             }
           }
         }
+      }
     }
     return position
   }
@@ -87,12 +86,12 @@ object utilTicTacToe {
    * @param joueur Le joueur actif
    * @return Int La position iédale à jouer
    */
-  private def doisJouer(grille: List[List[Char]], joueur: Char): Int = {
+  private def doisJouer(indexPartie: Int, grille: List[List[Char]], joueur: Char): Int = {
     var positionPossible: List[Int] = List()
     var grilleRetour = grille
 
     for (a <- 0 to positionPrioritaire.size - 1) {
-      if (grilleRetour(positionPrioritaire(a)) == '-') {
+      if (grilleRetour(indexPartie)(positionPrioritaire(a)) == '-') {
         positionPossible = positionPossible :+ positionPrioritaire(a)
       }
     }
@@ -101,7 +100,7 @@ object utilTicTacToe {
 
     if (positionPossible.isEmpty) {
       for (a <- 0 to positionNonPrioritaire.size - 1) {
-        if (grilleRetour(positionNonPrioritaire(a)) == '-') {
+        if (grilleRetour(indexPartie)(positionNonPrioritaire(a)) == '-') {
           positionPossible = positionPossible :+ positionNonPrioritaire(a)
         }
       }
@@ -123,7 +122,7 @@ object utilTicTacToe {
    * @param adversaire L'adversaire du joueur actif
    * @return Int La position où l'AI devrait jouer
    */
-  def obtenirPositionAI(grille: List[List[Char]], joueur: Char, adversaire: Char): Int = {
+  def obtenirPositionAI(index: Int, grille: List[List[Char]], joueur: Char, adversaire: Char): Int = {
     var aJoue = false
     var grilleTemp = grille
     var position = -1
@@ -134,13 +133,13 @@ object utilTicTacToe {
       position = doisBloquer(grille, joueur, adversaire)
 
       if (position == -1) {
-        position = doisJouer(grille, joueur)
+        position = doisJouer(index, grille, joueur)
       }
     }
     return position
   }
   /**
-   * Le joueur actif joue un tour 
+   * Le joueur actif joue un tour
    * @param grille La grille de jeu
    * @param joueur Le joueur actif
    * @param index La position ou le joueur actif veux jouer
@@ -160,12 +159,11 @@ object utilTicTacToe {
    * @param grille La grille de jeu
    * @return List[Char] Une nouvelle grille de jeu
    */
-  def initList(grille: List[List[Char]]): List[List[Char]] = {  
+  def initList(grille: List[List[Char]]): List[List[Char]] = {
     var grilleTemp = grille
-    
-    for (a <- 0 to 8) 
-    {
-        grilleTemp = grilleTemp :+ List('-', '-', '-', '-', '-', '-', '-', '-', '-')     
+
+    for (a <- 0 to 8) {
+      grilleTemp = grilleTemp :+ List('-', '-', '-', '-', '-', '-', '-', '-', '-')
     }
 
     return grilleTemp
@@ -182,17 +180,17 @@ object utilTicTacToe {
 
     for (x <- 0 to 8) {
       var partieTemp = grille(x)
-        for (a <- 0 to 7) {
-          var nmb = 0
-          for (b <- 0 to 2) {
-            if (partieTemp(cGagnante(a)(b)) == joueur) {
-              nmb = nmb + 1
-              if (nmb == 3) {
-                retour = true
-              }
+      for (a <- 0 to 7) {
+        var nmb = 0
+        for (b <- 0 to 2) {
+          if (partieTemp(cGagnante(a)(b)) == joueur) {
+            nmb = nmb + 1
+            if (nmb == 3) {
+              retour = true
             }
           }
         }
+      }
     }
 
     return retour
@@ -227,7 +225,7 @@ object utilTicTacToe {
   /**
    * Vérifie si il reste une case libre.
    * @param grille Une grille de jeu
-   * @return Boolean True si la grille est pleine, False si la grille n'est pas pleine 
+   * @return Boolean True si la grille est pleine, False si la grille n'est pas pleine
    */
   def gameOver(grille: List[List[Char]]): Boolean = {
     var nombreCaseNonVide = 0
@@ -237,7 +235,7 @@ object utilTicTacToe {
     return nombreCaseNonVide == nombreDeCase
   }
 
-   /**
+  /**
    * Vérifie si la case est libre.
    * @param grille Une grille de jeu
    * @param une position dans la grille de jeu

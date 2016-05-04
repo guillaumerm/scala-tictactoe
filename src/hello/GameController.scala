@@ -37,7 +37,7 @@ class GameController extends jfxf.Initializable {
 
   var ensemblePartie: List[List[Char]] = _
 
-  var indexPartieActive: Int = _
+  var indexPartieActive: Int = -1
 
   var partie: List[Char] = List('-', '-', '-', '-', '-', '-', '-', '-', '-')
 
@@ -70,15 +70,15 @@ class GameController extends jfxf.Initializable {
     var indexPartie = ((btn.getId() takeRight 2) takeRight 1).toInt
 
     if (compteurTour == 0 || partie == indexPartieActive) {
-      gestionTour(partie, indexPartie)
       indexPartieActive = indexPartie
-      println(indexPartieActive)
+      gestionTour(partie, indexPartie)
       if (ai) {
         gestionTourAI(indexPartieActive)
       }
-    }else{
-      println("Fart")
+    } else {
+      println("Vous n'avez pas joué dans la bonne case!!!")
     }
+    //println(ensemblePartie)
   }
 
   /**
@@ -99,7 +99,13 @@ class GameController extends jfxf.Initializable {
   private def gestionTourAI(indexPartie: Int) {
     joueurActif = if (compteurTour % 2 == 0) joueurX else joueurO
 
-    var temp = ensemblePartie.updated(indexPartie, utilTicTacToe.jouerTour(partie, joueurActif, utilTicTacToe.obtenirPositionAI(ensemblePartie, joueurActif, joueurX)))
+    var position = utilTicTacToe.obtenirPositionAI(indexPartieActive, ensemblePartie, joueurActif, joueurX)
+    println(ensemblePartie)
+    var temp = ensemblePartie.updated(indexPartie, utilTicTacToe.jouerTour(partie, joueurActif, position))
+    
+    println(temp)
+    
+    indexPartieActive = position
 
     updateGame(temp, joueurActif)
   }
@@ -111,12 +117,16 @@ class GameController extends jfxf.Initializable {
     for (a <- 0 to ensemblePartie.size - 1) {
       for (b <- 0 to ensemblePartie(a).size - 1) {
         if (grilleJeu.children(a).isInstanceOf[jfxsl.GridPane]) {
-          var test = grilleJeu.children(a).asInstanceOf[jfxsl.GridPane];
-          test.children(b).asInstanceOf[jfxsc.Button].setText(ensemblePartie(a)(b).toString())
+          var temp = grilleJeu.children(a).asInstanceOf[jfxsl.GridPane];
+          temp.children(b).asInstanceOf[jfxsc.Button].setText(ensemblePartie(a)(b).toString())
+          if (a == indexPartieActive) {
+            temp.children(b).asInstanceOf[jfxsc.Button].setStyle("-fx-background-color: white")
+          } else {
+            temp.children(b).asInstanceOf[jfxsc.Button].setStyle("")
+          }
         }
       }
     }
-    grilleJeu.children(indexPartieActive).asInstanceOf[jfxsl.GridPane].setStyle("-fx-background-color: blue")
     var prochain = if (joueurActif == joueurO) joueurX else joueurO
     etat.setText("C'est le tour des " + prochain)
   }
@@ -172,6 +182,7 @@ class GameController extends jfxf.Initializable {
    * Fonction qui permet de renitialiser la partie.
    */
   def initList() {
+    indexPartieActive = -1
     etat.setText("La partie n'est pas commencé")
     partie = List('-', '-', '-', '-', '-', '-', '-', '-', '-')
 
