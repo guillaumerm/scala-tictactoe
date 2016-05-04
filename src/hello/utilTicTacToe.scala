@@ -5,7 +5,7 @@ package hello
 */
 object utilTicTacToe {
 
-  val nombreDeCase = 9
+  val nombreDeCase = 81
 
   val cGagnante: List[List[Int]] = List(
     List(0, 1, 2),
@@ -26,23 +26,25 @@ object utilTicTacToe {
    * @param joueur Le joueur actif
    * @return Int La position iédale à jouer
    */
-  private def doisBloquer(grille: List[Char], joueur: Char, adversaire: Char): Int = {
+  private def doisBloquer(grille: List[List[Char]], joueur: Char, adversaire: Char): Int = {
     var position = -1
-    var grilleTemp = grille
     var aJoue = false
-    for (a <- 0 to (cGagnante.size - 1)) {
-      for (b <- 0 to (cGagnante(a).size - 1)) {
-        if (grilleTemp(cGagnante(a)(b)) == '-' && !aJoue) {
-          grilleTemp = grilleTemp.updated(cGagnante(a)(b), adversaire)
-          if (utilTicTacToe.estGagnant(grilleTemp, adversaire)) {
-            aJoue = true
-            grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
-            position = cGagnante(a)(b)
-          } else {
-            grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
+    for (x <- 0 to (cGagnante.size - 1)) {
+        var grilleTemp = grille(x)  
+        for (a <- 0 to (cGagnante.size - 1)) {
+          for (b <- 0 to (cGagnante(a).size - 1)) {
+            if (grilleTemp(cGagnante(a)(b)) == '-' && !aJoue) {
+              grilleTemp = grilleTemp.updated(cGagnante(a)(b), adversaire)
+              if (utilTicTacToe.estGagnant(grille, adversaire)) {
+                aJoue = true
+                grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
+                position = cGagnante(a)(b)
+              } else {
+                grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
+              }
+            }
           }
         }
-      }
     }
     return position
   }
@@ -53,24 +55,27 @@ object utilTicTacToe {
    * @param joueur Le joueur actif
    * @return Int La position iédale à jouer
    */
-  private def doisGagner(grille: List[Char], joueur: Char): Int = {
-    var grilleTemp = grille
+  private def doisGagner(grille: List[List[Char]], joueur: Char): Int = {
     var position = -1
     var aJoue = false
     //Si il peut jouer pour gagner
-    for (a <- 0 to (cGagnante.size - 1)) {
-      for (b <- 0 to (cGagnante(a).size - 1)) {
-        if (grilleTemp(cGagnante(a)(b)) == '-' && !aJoue) {
-          grilleTemp = grilleTemp.updated(cGagnante(a)(b), joueur)
-          if (utilTicTacToe.estGagnant(grilleTemp, joueur)) {
-            aJoue = true
-            grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
-            position = cGagnante(a)(b)
-          } else {
-            grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
+    for (x <- 0 to grille.size-1) {
+      
+    var grilleTemp = grille(x)
+        for (a <- 0 to (cGagnante.size - 1)) {
+          for (b <- 0 to (cGagnante(a).size - 1)) {           
+            if (grilleTemp(cGagnante(a)(b)) == '-' && !aJoue) {
+              grilleTemp = grilleTemp.updated(cGagnante(a)(b), joueur)
+              if (utilTicTacToe.estGagnant(grille, joueur)) {
+                aJoue = true
+                grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
+                position = cGagnante(a)(b)
+              } else {
+                grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
+              }
+            }
           }
         }
-      }
     }
     return position
   }
@@ -82,7 +87,7 @@ object utilTicTacToe {
    * @param joueur Le joueur actif
    * @return Int La position iédale à jouer
    */
-  private def doisJouer(grille: List[Char], joueur: Char): Int = {
+  private def doisJouer(grille: List[List[Char]], joueur: Char): Int = {
     var positionPossible: List[Int] = List()
     var grilleRetour = grille
 
@@ -118,7 +123,7 @@ object utilTicTacToe {
    * @param adversaire L'adversaire du joueur actif
    * @return Int La position où l'AI devrait jouer
    */
-  def obtenirPositionAI(grille: List[Char], joueur: Char, adversaire: Char): Int = {
+  def obtenirPositionAI(grille: List[List[Char]], joueur: Char, adversaire: Char): Int = {
     var aJoue = false
     var grilleTemp = grille
     var position = -1
@@ -155,9 +160,13 @@ object utilTicTacToe {
    * @param grille La grille de jeu
    * @return List[Char] Une nouvelle grille de jeu
    */
-  def initList(grille: List[Char]): List[Char] = {
+  def initList(grille: List[List[Char]]): List[List[Char]] = {  
     var grilleTemp = grille
-    grilleTemp = List('-', '-', '-', '-', '-', '-', '-', '-', '-')
+    
+    for (a <- 0 to 8) 
+    {
+        grilleTemp = grilleTemp :+ List('-', '-', '-', '-', '-', '-', '-', '-', '-')     
+    }
 
     return grilleTemp
   }
@@ -168,19 +177,22 @@ object utilTicTacToe {
    * @param joueur Le joueur actif
    * @return Boolean True si je joueur a gagné, False si le joueur n'a pas gagné
    */
-  def estGagnant(grille: List[Char], joueur: Char): Boolean = {
+  def estGagnant(grille: List[List[Char]], joueur: Char): Boolean = {
     var retour = false
 
-    for (a <- 0 to 7) {
-      var nmb = 0
-      for (b <- 0 to 2) {
-        if (grille(cGagnante(a)(b)) == joueur) {
-          nmb = nmb + 1
-          if (nmb == 3) {
-            retour = true
+    for (x <- 0 to 8) {
+      var partieTemp = grille(x)
+        for (a <- 0 to 7) {
+          var nmb = 0
+          for (b <- 0 to 2) {
+            if (partieTemp(cGagnante(a)(b)) == joueur) {
+              nmb = nmb + 1
+              if (nmb == 3) {
+                retour = true
+              }
+            }
           }
         }
-      }
     }
 
     return retour
@@ -208,7 +220,7 @@ object utilTicTacToe {
    * @param grille La deuxième grille de jeu
    * @return Boolean True si les deux grille de jeux sont identique, False si les deux grille de jeux sont différentes
    */
-  def partieEquals(grille: List[Char], other_grille: List[Char]): Boolean = {
+  def partieEquals(grille: List[List[Char]], other_grille: List[List[Char]]): Boolean = {
     return grille.sameElements(other_grille)
   }
 
@@ -217,11 +229,10 @@ object utilTicTacToe {
    * @param grille Une grille de jeu
    * @return Boolean True si la grille est pleine, False si la grille n'est pas pleine 
    */
-  def gameOver(grille: List[Char]): Boolean = {
+  def gameOver(grille: List[List[Char]]): Boolean = {
     var nombreCaseNonVide = 0
     var retour = false
-
-    grille.foreach { x => if (x != '-') nombreCaseNonVide = nombreCaseNonVide + 1 }
+    grille.foreach { x => x.foreach { y => if (y != '-') nombreCaseNonVide = nombreCaseNonVide + 1 } }
 
     return nombreCaseNonVide == nombreDeCase
   }

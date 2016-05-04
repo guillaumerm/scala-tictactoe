@@ -8,16 +8,19 @@ import javafx.{ event => jfxe }
 import javafx.{ fxml => jfxf }
 import scalafx.Includes._
 import scalafx.scene.layout.GridPane
+import scalafx.scene.Node
 import javafx.scene.control.Button
 import scalafx.scene.control.Alert
 import scalafx.scene.control.Alert.AlertType
+import javafx.event.EventHandler
+import scalafx.event.ActionEvent
 
 /**
-* Cette classe est le controleur d'un jeu de Tic-Tac-Toe. Il gère les événement généré par l'interface.
-* Il s'occupe de les gestions des tours et d'assigner les valeurs dans les cases respective. 
-* Lorsque celui-ci est activé, il invoque l'intéligence artificielle.
-* @author Guillaume Rochefort-Mathieu & Antoine Laplante
-*/
+ * Cette classe est le controleur d'un jeu de Tic-Tac-Toe. Il gère les événement généré par l'interface.
+ * Il s'occupe de les gestions des tours et d'assigner les valeurs dans les cases respective.
+ * Lorsque celui-ci est activé, il invoque l'intéligence artificielle.
+ * @author Guillaume Rochefort-Mathieu & Antoine Laplante
+ */
 class GameController extends jfxf.Initializable {
 
   var ai = false
@@ -31,6 +34,10 @@ class GameController extends jfxf.Initializable {
     List(2, 5, 8),
     List(0, 4, 8),
     List(2, 4, 6))
+
+  var ensemblePartie: List[List[Char]] = _
+
+  var indexPartieActive: Int = _
 
   var partie: List[Char] = List('-', '-', '-', '-', '-', '-', '-', '-', '-')
 
@@ -50,8 +57,7 @@ class GameController extends jfxf.Initializable {
   private var test: jfxsl.Pane = _
   @jfxf.FXML
   var etat: jfxsc.Label = _
-  
-  
+
   /**
    * Fonction qui permet la gestion d'un tour d'un humain.
    * @param event Le clic du boutons
@@ -60,9 +66,18 @@ class GameController extends jfxf.Initializable {
   private def actionCase(event: jfxe.ActionEvent) {
     println("")
     val btn: jfxsc.Button = event.getSource.asInstanceOf[jfxsc.Button]
-    gestionTour((btn.getId() takeRight 1).toInt)
-    if (ai) {
-      gestionTourAI()
+    var partie = ((btn.getId() takeRight 2) take 1).toInt
+    var indexPartie = ((btn.getId() takeRight 2) takeRight 1).toInt
+
+    if (compteurTour == 0 || partie == indexPartieActive) {
+      gestionTour(partie, indexPartie)
+      indexPartieActive = indexPartie
+      println(indexPartieActive)
+      if (ai) {
+        gestionTourAI(indexPartieActive)
+      }
+    }else{
+      println("Fart")
     }
   }
 
@@ -70,33 +85,38 @@ class GameController extends jfxf.Initializable {
    * Fonction qui permet la gestion d'un tour d'un humain.
    * @param index La position du boutons cliqué
    */
-  private def gestionTour(index: Int) {
+  private def gestionTour(indexPartie: Int, indexPosition: Int) {
     joueurActif = if (compteurTour % 2 == 0) joueurX else joueurO
 
-    var partieTemp = utilTicTacToe.jouerTour(partie, joueurActif, index)
+    var temp = ensemblePartie.updated(indexPartie, utilTicTacToe.jouerTour(ensemblePartie(indexPartie), joueurActif, indexPosition))
 
-    updateGame(partieTemp, joueurActif)
+    updateGame(temp, joueurActif)
   }
 
   /**
    * Fonction qui permet la gestion d'un tour d'un IA
    */
-  private def gestionTourAI() {
+  private def gestionTourAI(indexPartie: Int) {
     joueurActif = if (compteurTour % 2 == 0) joueurX else joueurO
 
-    var partieTemp = utilTicTacToe.jouerTour(partie, joueurActif, utilTicTacToe.obtenirPositionAI(partie, joueurActif, joueurX))
+    var temp = ensemblePartie.updated(indexPartie, utilTicTacToe.jouerTour(partie, joueurActif, utilTicTacToe.obtenirPositionAI(ensemblePartie, joueurActif, joueurX)))
 
-    updateGame(partieTemp, joueurActif)
+    updateGame(temp, joueurActif)
   }
 
   /**
    * Fonction qui permet de mettre à jour la vue
    */
   private def updateView() {
-    for (a <- 0 to partie.size - 1) {
-      grilleJeu.children(a).asInstanceOf[jfxsc.Button].setText(partie(a).toString())
+    for (a <- 0 to ensemblePartie.size - 1) {
+      for (b <- 0 to ensemblePartie(a).size - 1) {
+        if (grilleJeu.children(a).isInstanceOf[jfxsl.GridPane]) {
+          var test = grilleJeu.children(a).asInstanceOf[jfxsl.GridPane];
+          test.children(b).asInstanceOf[jfxsc.Button].setText(ensemblePartie(a)(b).toString())
+        }
+      }
     }
-
+    grilleJeu.children(indexPartieActive).asInstanceOf[jfxsl.GridPane].setStyle("-fx-background-color: blue")
     var prochain = if (joueurActif == joueurO) joueurX else joueurO
     etat.setText("C'est le tour des " + prochain)
   }
@@ -106,22 +126,22 @@ class GameController extends jfxf.Initializable {
    * @param nouvelleGrille La nouvelle grille de jeu
    * @param joueur Le joueur actif
    */
-  private def updateGame(nouvelleGrille: List[Char], joueur: Char) {
-    if (!utilTicTacToe.partieEquals(partie, nouvelleGrille)) {
-      partie = nouvelleGrille
+  private def updateGame(nouvelleGrille: List[List[Char]], joueur: Char) {
+    if (!utilTicTacToe.partieEquals(ensemblePartie, nouvelleGrille)) {
+      ensemblePartie = nouvelleGrille
       compteurTour = compteurTour + 1
       updateView()
     }
 
     if (compteurTour > 4 && compteurTour < 10) {
-      if (utilTicTacToe.estGagnant(partie, joueur)) {
+      if (utilTicTacToe.estGagnant(ensemblePartie, joueur)) {
         var alert = new Alert(AlertType.Information)
         alert.setTitle("Partie Terminée")
         alert.setHeaderText("Le joueur " + joueur + " as gagné")
         alert.setContentText("Cliquer sur OK pour recommencer un partie")
         alert.showAndWait()
         initList()
-      } else if (utilTicTacToe.gameOver(partie)) {
+      } else if (utilTicTacToe.gameOver(ensemblePartie)) {
         var alert = new Alert(AlertType.Information)
         alert.setTitle("Partie Terminée")
         alert.setHeaderText("Partie null aucun joueur a gagné.")
@@ -144,9 +164,8 @@ class GameController extends jfxf.Initializable {
 
   def initialize(url: URL, rb: util.ResourceBundle) {
     grilleJeu = new GridPane(gridDelegate)
-    for (a <- 0 to partie.size - 1) {
-      grilleJeu.children(a).asInstanceOf[jfxsc.Button].setText(partie(a).toString())
-    }
+    initList()
+    updateView()
   }
 
   /**
@@ -157,8 +176,7 @@ class GameController extends jfxf.Initializable {
     partie = List('-', '-', '-', '-', '-', '-', '-', '-', '-')
 
     compteurTour = 0
-    for (a <- 0 to partie.size - 1) {
-      grilleJeu.children(a).asInstanceOf[jfxsc.Button].setText(partie(a).toString())
-    }
+    ensemblePartie = utilTicTacToe.initList(List[List[Char]]())
+    updateView()
   }
 }
