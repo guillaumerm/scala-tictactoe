@@ -18,7 +18,7 @@ object ScalaFXTicTacToe extends JFXApp {
   val root: jfxs.Parent = jfxf.FXMLLoader.load(resource)
 
   stage = new PrimaryStage() {
-    title = "FXML GridPane Demo"
+    title = "TicTacToe Ten"
     scene = new Scene(root)
   }
 }

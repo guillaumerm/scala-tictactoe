@@ -26,22 +26,25 @@ object utilTicTacToe {
    * @param joueur Le joueur actif
    * @return Int La position iédale à jouer
    */
-  private def doisBloquer(grille: List[List[Char]], joueur: Char, adversaire: Char): Int = {
+  private def doisBloquer(index: Int, grille: List[List[Char]], joueur: Char, adversaire: Char): Int = {
     var position = -1
     var aJoue = false
-    for (x <- 0 to (cGagnante.size - 1)) {
-      var grilleTemp = grille(x)
-      for (a <- 0 to (cGagnante.size - 1)) {
-        for (b <- 0 to (cGagnante(a).size - 1)) {
-          if (grilleTemp(cGagnante(a)(b)) == '-' && !aJoue) {
-            grilleTemp = grilleTemp.updated(cGagnante(a)(b), adversaire)
-            if (utilTicTacToe.estGagnant(grille, adversaire)) {
-              aJoue = true
-              grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
-              position = cGagnante(a)(b)
-            } else {
-              grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
-            }
+    var partieTemp = grille(index)
+    var grilleTemp = grille
+    for (a <- 0 to (cGagnante.size - 1)) {
+      for (b <- 0 to (cGagnante(a).size - 1)) {
+        if (partieTemp(cGagnante(a)(b)) == '-') {
+          partieTemp = partieTemp.updated(cGagnante(a)(b), adversaire)
+          grilleTemp = grilleTemp.updated(index, partieTemp)
+          if (utilTicTacToe.estGagnant(grilleTemp, adversaire)) {
+            //Si sa bug cest cette ligne
+            //aJoue = true
+            partieTemp = partieTemp.updated(cGagnante(a)(b), '-')
+            grilleTemp = grilleTemp.updated(index, partieTemp)
+            position = cGagnante(a)(b)
+          } else {
+            partieTemp = partieTemp.updated(cGagnante(a)(b), '-')
+            grilleTemp = grilleTemp.updated(index, partieTemp)
           }
         }
       }
@@ -55,23 +58,24 @@ object utilTicTacToe {
    * @param joueur Le joueur actif
    * @return Int La position iédale à jouer
    */
-  private def doisGagner(grille: List[List[Char]], joueur: Char): Int = {
+  private def doisGagner(index: Int, grille: List[List[Char]], joueur: Char): Int = {
     var position = -1
     var aJoue = false
-    //Si il peut jouer pour gagner
-    for (x <- 0 to grille.size - 1) {
-      var grilleTemp = grille(x)
-      for (a <- 0 to (cGagnante.size - 1)) {
-        for (b <- 0 to (cGagnante(a).size - 1)) {
-          if (grilleTemp(cGagnante(a)(b)) == '-' && !aJoue) {
-            grilleTemp = grilleTemp.updated(cGagnante(a)(b), joueur)
-            if (utilTicTacToe.estGagnant(grille, joueur)) {
-              aJoue = true
-              grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
-              position = cGagnante(a)(b)
-            } else {
-              grilleTemp = grilleTemp.updated(cGagnante(a)(b), '-')
-            }
+    var partieTemp = grille(index)
+    var grilleTemp = grille
+    for (a <- 0 to (cGagnante.size - 1)) {
+      for (b <- 0 to (cGagnante(a).size - 1)) {
+        if (partieTemp(cGagnante(a)(b)) == '-' && !aJoue) {
+          partieTemp = partieTemp.updated(cGagnante(a)(b), joueur)
+          grilleTemp = grilleTemp.updated(index, partieTemp)
+          if (utilTicTacToe.estGagnant(grilleTemp, joueur)) {
+            aJoue = true
+            partieTemp = partieTemp.updated(cGagnante(a)(b), '-')
+            grilleTemp = grilleTemp.updated(index, partieTemp)
+            position = cGagnante(a)(b)
+          } else {
+            partieTemp = partieTemp.updated(cGagnante(a)(b), '-')
+            grilleTemp = grilleTemp.updated(index, partieTemp)
           }
         }
       }
@@ -86,10 +90,29 @@ object utilTicTacToe {
    * @param joueur Le joueur actif
    * @return Int La position iédale à jouer
    */
-  private def doisJouer(indexPartie: Int, grille: List[List[Char]], joueur: Char): Int = {
+  private def doisJouer(indexPartie: Int, grille: List[List[Char]], joueur: Char, adversaire: Char): Int = {
     var positionPossible: List[Int] = List()
+    var positionPasPossible: List[Int] = List()
     var grilleRetour = grille
+    var position = -1
 
+    /*
+     * Obtien les positions ou que l'adversaire gagnerait le prochain tour.
+     */
+    val it = Iterator(grille)
+    var i = 0
+    while (i < grille.size - 1 && position == -1) {
+      if (doisBloquer(i, grille, joueur, adversaire) != -1) {
+        if (!positionPasPossible.contains(i)) {
+          positionPasPossible = positionPasPossible :+ i
+        }
+      }
+      i = i + 1
+    }
+
+    /*
+     * Obtien les positions possible par rapport au position prioritaires
+     */
     for (a <- 0 to positionPrioritaire.size - 1) {
       if (grilleRetour(indexPartie)(positionPrioritaire(a)) == '-') {
         positionPossible = positionPossible :+ positionPrioritaire(a)
@@ -98,6 +121,9 @@ object utilTicTacToe {
 
     var positionJoue = -1
 
+    /*
+     * Obtien les positions possible par rapport au position non prioritaires
+     */
     if (positionPossible.isEmpty) {
       for (a <- 0 to positionNonPrioritaire.size - 1) {
         if (grilleRetour(indexPartie)(positionNonPrioritaire(a)) == '-') {
@@ -105,7 +131,18 @@ object utilTicTacToe {
         }
       }
     }
-    return positionPossible(scala.util.Random.nextInt(positionPossible.size))
+
+    /*
+     * Enlève des positions possibles les positions que l'adversaire gagnerait le prochain tour
+     */
+    positionPossible = positionPossible.filterNot(positionPasPossible.toSet)
+    
+    if (positionPossible.isEmpty) { // Si les position possibles est vide nous obtenons un position aléatoirement dans les positions ou que l'adversaire gangerait le prochain tour
+      positionJoue = positionPasPossible(scala.util.Random.nextInt(positionPossible.size))
+    } else {// Sinon nous retournons une positions aléatoirement des positions possibles
+      positionJoue = positionPossible(scala.util.Random.nextInt(positionPossible.size))
+    }
+    return positionJoue
   }
 
   /**
@@ -127,13 +164,13 @@ object utilTicTacToe {
     var grilleTemp = grille
     var position = -1
 
-    position = doisGagner(grille, joueur)
+    position = doisGagner(index, grille, joueur)
 
     if (position == -1) {
-      position = doisBloquer(grille, joueur, adversaire)
+      position = doisBloquer(index, grille, joueur, adversaire)
 
       if (position == -1) {
-        position = doisJouer(index, grille, joueur)
+        position = doisJouer(index, grille, joueur, adversaire)
       }
     }
     return position

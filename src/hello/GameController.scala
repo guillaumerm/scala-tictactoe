@@ -39,8 +39,6 @@ class GameController extends jfxf.Initializable {
 
   var indexPartieActive: Int = -1
 
-  var partie: List[Char] = List('-', '-', '-', '-', '-', '-', '-', '-', '-')
-
   var compteurTour: Int = 0
 
   val joueurX: Char = 'X'
@@ -64,7 +62,6 @@ class GameController extends jfxf.Initializable {
    */
   @jfxf.FXML
   private def actionCase(event: jfxe.ActionEvent) {
-    println("")
     val btn: jfxsc.Button = event.getSource.asInstanceOf[jfxsc.Button]
     var partie = ((btn.getId() takeRight 2) take 1).toInt
     var indexPartie = ((btn.getId() takeRight 2) takeRight 1).toInt
@@ -100,11 +97,8 @@ class GameController extends jfxf.Initializable {
     joueurActif = if (compteurTour % 2 == 0) joueurX else joueurO
 
     var position = utilTicTacToe.obtenirPositionAI(indexPartieActive, ensemblePartie, joueurActif, joueurX)
-    println(ensemblePartie)
-    var temp = ensemblePartie.updated(indexPartie, utilTicTacToe.jouerTour(partie, joueurActif, position))
-    
-    println(temp)
-    
+    var temp = ensemblePartie.updated(indexPartie, utilTicTacToe.jouerTour(ensemblePartie(indexPartie), joueurActif, position))
+
     indexPartieActive = position
 
     updateGame(temp, joueurActif)
@@ -143,22 +137,20 @@ class GameController extends jfxf.Initializable {
       updateView()
     }
 
-    if (compteurTour > 4 && compteurTour < 10) {
-      if (utilTicTacToe.estGagnant(ensemblePartie, joueur)) {
-        var alert = new Alert(AlertType.Information)
-        alert.setTitle("Partie Terminée")
-        alert.setHeaderText("Le joueur " + joueur + " as gagné")
-        alert.setContentText("Cliquer sur OK pour recommencer un partie")
-        alert.showAndWait()
-        initList()
-      } else if (utilTicTacToe.gameOver(ensemblePartie)) {
-        var alert = new Alert(AlertType.Information)
-        alert.setTitle("Partie Terminée")
-        alert.setHeaderText("Partie null aucun joueur a gagné.")
-        alert.setContentText("Cliquer sur OK pour recommencer un partie")
-        alert.showAndWait()
-        initList()
-      }
+    if (utilTicTacToe.estGagnant(ensemblePartie, joueur)) {
+      var alert = new Alert(AlertType.Information)
+      alert.setTitle("Partie Terminée")
+      alert.setHeaderText("Le joueur " + joueur + " as gagné")
+      alert.setContentText("Cliquer sur OK pour recommencer un partie")
+      alert.showAndWait()
+      initList()
+    } else if (utilTicTacToe.gameOver(ensemblePartie)) {
+      var alert = new Alert(AlertType.Information)
+      alert.setTitle("Partie Terminée")
+      alert.setHeaderText("Partie null aucun joueur a gagné.")
+      alert.setContentText("Cliquer sur OK pour recommencer un partie")
+      alert.showAndWait()
+      initList()
     }
   }
 
@@ -184,7 +176,6 @@ class GameController extends jfxf.Initializable {
   def initList() {
     indexPartieActive = -1
     etat.setText("La partie n'est pas commencé")
-    partie = List('-', '-', '-', '-', '-', '-', '-', '-', '-')
 
     compteurTour = 0
     ensemblePartie = utilTicTacToe.initList(List[List[Char]]())
