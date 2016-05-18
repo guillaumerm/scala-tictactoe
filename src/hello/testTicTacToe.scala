@@ -61,14 +61,11 @@ class testTicTacToe extends FunSuite {
   }
   
   test("util.initList devrait réinitialiser la grille de jeu") {
-      var grilleTest1 = List('X', '-', '-', '-', '-', '-', '-', '-', '-')
-   	  var grilleTest2 = List('X', 'X', 'O', 'X', 'X', 'X', 'X', 'X', 'X')
-      var grilleTest3 = List('X', 'X', 'O', 'X', 'X', 'X', 'X', 'X', 'X')
-      var grilleComplete = List(grilleTest1, grilleTest1, grilleTest1, grilleTest2, grilleTest2, grilleTest2, grilleTest3, grilleTest3, grilleTest3) 
+      var grilleComplete = List() 
       var grilleRetour = utilTicTacToe.initList(grilleComplete)
-      assert(grilleRetour(0).contains('X'))
-      assert(grilleRetour(3).contains('O'))
-      assert(grilleRetour(6).contains('X'))
+      assert(!grilleRetour(0).contains('X'))
+      assert(grilleRetour(3).contains('-'))
+      assert(!grilleRetour(6).contains('O'))
   }
   
   test("util.gameOver dois retourner true quand la grille est plaine") {
